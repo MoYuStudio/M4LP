@@ -23,8 +23,8 @@
       <geometry><box size="0.60 0.25 0.15"/></geometry>
     </collision>
     <inertial>
-      <mass value="2.0"/>
-      <inertia ixx="0.01" iyy="0.01" izz="0.01"/>
+      <mass value="8.0"/>
+      <inertia ixx="0.2" iyy="0.8" izz="0.8"/>
     </inertial>
   </link>
 
@@ -37,7 +37,7 @@
     - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
   -->
   <link name="FL_hip">
-    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.3"/><inertia ixx="0.003" iyy="0.003" izz="0.003"/></inertial>
   </link>
   
   <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -75,7 +75,7 @@
       </material>
     </visual>
     <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
-    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.8"/><inertia ixx="0.01" iyy="0.01" izz="0.01"/></inertial>
   </link>
   <!-- 大腿固定关节：从髋关节向下12.5cm -->
   <joint name="FL_thigh_joint" type="fixed">
@@ -94,7 +94,7 @@
         <origin xyz="0 0 -0.125" rpy="0 0 0"/>
     </visual>
     <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
-    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.6"/><inertia ixx="0.008" iyy="0.008" izz="0.008"/></inertial>
   </link>
   
   <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -135,8 +135,8 @@
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
     <inertial>
-      <mass value="0.08"/>
-      <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/>
+      <mass value="0.4"/>
+      <inertia ixx="0.0005" iyy="0.0005" izz="0.0005"/>
     </inertial>
   </link>
   <!-- 轮子连续关节：Z轴滚动，不限角度 -->
@@ -157,7 +157,7 @@
     - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
   -->
   <link name="FR_hip">
-    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.3"/><inertia ixx="0.003" iyy="0.003" izz="0.003"/></inertial>
   </link>
   
   <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -195,7 +195,7 @@
       </material>
     </visual>
     <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
-    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.8"/><inertia ixx="0.01" iyy="0.01" izz="0.01"/></inertial>
   </link>
   <!-- 大腿固定关节：从髋关节向下12.5cm -->
   <joint name="FR_thigh_joint" type="fixed">
@@ -214,7 +214,7 @@
         <origin xyz="0 0 -0.125" rpy="0 0 0"/>
     </visual>
     <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
-    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.6"/><inertia ixx="0.008" iyy="0.008" izz="0.008"/></inertial>
   </link>
   
   <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -254,7 +254,7 @@
       <geometry><cylinder length="0.04" radius="0.05"/></geometry>
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
-    <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+    <inertial><mass value="0.4"/><inertia ixx="0.0005" iyy="0.0005" izz="0.0005"/></inertial>
   </link>
   <!-- 轮子连续关节：Z轴滚动，不限角度 -->
   <joint name="FR_wheel_joint" type="continuous">
@@ -274,7 +274,7 @@
     - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
   -->
   <link name="RL_hip">
-    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.3"/><inertia ixx="0.003" iyy="0.003" izz="0.003"/></inertial>
   </link>
   
   <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -312,7 +312,7 @@
       </material>
     </visual>
     <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
-    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.8"/><inertia ixx="0.01" iyy="0.01" izz="0.01"/></inertial>
   </link>
   <!-- 大腿固定关节：从髋关节向下12.5cm -->
   <joint name="RL_thigh_joint" type="fixed">
@@ -331,7 +331,7 @@
         <origin xyz="0 0 -0.125" rpy="0 0 0"/>
     </visual>
     <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
-    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.6"/><inertia ixx="0.008" iyy="0.008" izz="0.008"/></inertial>
   </link>
   
   <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -371,7 +371,7 @@
       <geometry><cylinder length="0.04" radius="0.05"/></geometry>
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
-    <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+    <inertial><mass value="0.4"/><inertia ixx="0.0005" iyy="0.0005" izz="0.0005"/></inertial>
   </link>
   <!-- 轮子连续关节：Z轴滚动，不限角度 -->
   <joint name="RL_wheel_joint" type="continuous">
@@ -391,7 +391,7 @@
     - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
   -->
   <link name="RR_hip">
-    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.3"/><inertia ixx="0.003" iyy="0.003" izz="0.003"/></inertial>
   </link>
   
   <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -429,7 +429,7 @@
       </material>
     </visual>
     <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
-    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.8"/><inertia ixx="0.01" iyy="0.01" izz="0.01"/></inertial>
   </link>
   <!-- 大腿固定关节：从髋关节向下12.5cm -->
   <joint name="RR_thigh_joint" type="fixed">
@@ -448,7 +448,7 @@
         <origin xyz="0 0 -0.125" rpy="0 0 0"/>
     </visual>
     <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
-    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+    <inertial><mass value="0.6"/><inertia ixx="0.008" iyy="0.008" izz="0.008"/></inertial>
   </link>
   
   <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
@@ -488,7 +488,7 @@
       <geometry><cylinder length="0.04" radius="0.05"/></geometry>
       <origin xyz="0 0 0" rpy="0 0 0"/>
     </collision>
-    <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+    <inertial><mass value="0.4"/><inertia ixx="0.0005" iyy="0.0005" izz="0.0005"/></inertial>
   </link>
   <!-- 轮子连续关节：Z轴滚动，不限角度 -->
   <joint name="RR_wheel_joint" type="continuous">
