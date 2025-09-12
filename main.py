@@ -68,7 +68,8 @@ gyro_max_history = 1000     # 最大历史记录数量
 wheel_speed = 6.0  # 轮子速度
 time_step = 0.01    # 时间步长
 max_speed = 24.0    # 最大速度
-turn_speed = 8.0    # 转向速度
+turn_speed = 12.0   # 转向速度（增加转向力度）
+tilt_turn_factor = 0.3  # 倾斜转弯系数
 
 # ========================================
 # 四足机器人姿态参数配置 (简化管理)
@@ -91,6 +92,7 @@ RR_EXTEND = 0.3          # 右后腿伸腿程度：0=屈膝，1=站立
 # 当前移动状态
 current_speed = 0.0
 current_turn = 0.0
+current_tilt = 0.0  # 当前倾斜角度（用于转弯）
 
 # 模式控制
 current_mode = 1  # 1=默认模式, 2=踏步模式
@@ -189,6 +191,51 @@ def analyze_gyro_data():
     
     return analysis
 
+# 倾斜转弯控制函数
+def apply_tilt_turning(turn_input, speed_input):
+    """
+    应用倾斜转弯效果
+    turn_input: 转向输入 (-1 到 1)
+    speed_input: 速度输入
+    返回: (left_speed, right_speed, tilt_angle)
+    """
+    global current_tilt
+    
+    # 计算倾斜角度（转弯时车身倾斜）
+    if abs(turn_input) > 0.1 and abs(speed_input) > 0.1:  # 只有在移动时才能倾斜转弯
+        # 倾斜角度与转向输入成正比，与速度成正比
+        target_tilt = -turn_input * tilt_turn_factor * min(abs(speed_input) / max_speed, 1.0)
+        
+        # 平滑过渡到目标倾斜角度
+        tilt_smoothing = 0.1
+        current_tilt = current_tilt * (1 - tilt_smoothing) + target_tilt * tilt_smoothing
+    else:
+        # 没有转向时，逐渐回到水平
+        current_tilt = current_tilt * 0.95
+    
+    # 计算左右轮子差速
+    if abs(speed_input) > 0.1:  # 有速度时
+        # 基础速度
+        base_speed = speed_input
+        
+        # 差速转弯：内侧轮子减速，外侧轮子加速
+        speed_diff = abs(turn_input) * turn_speed
+        if turn_input > 0:  # 左转
+            left_speed = base_speed - speed_diff
+            right_speed = base_speed + speed_diff
+        elif turn_input < 0:  # 右转
+            left_speed = base_speed + speed_diff
+            right_speed = base_speed - speed_diff
+        else:  # 直行
+            left_speed = base_speed
+            right_speed = base_speed
+    else:
+        # 没有速度时，停止
+        left_speed = 0.0
+        right_speed = 0.0
+    
+    return left_speed, right_speed, current_tilt
+
 # 伸腿值转换为关节角度的函数
 def extend_to_joint_angles(extend_value, leg_type):
     """
@@ -212,35 +259,35 @@ def set_stable_pose():
     # 设置关节到屈膝稳定位置
     for joint_name, joint_id in joint_indices.items():
         if 'hip' in joint_name:
-            # 髋关节角度：使用伸腿值 + 高度调整 + 左右倾斜调整
+            # 髋关节角度：使用伸腿值 + 高度调整 + 左右倾斜调整 + 转弯倾斜
             if 'FL' in joint_name:  # 左前腿
                 base_hip, _ = extend_to_joint_angles(FL_EXTEND, 'front')
-                hip_angle = base_hip + height_adjustment - roll_adjustment
+                hip_angle = base_hip + height_adjustment - roll_adjustment - current_tilt
             elif 'FR' in joint_name:  # 右前腿
                 base_hip, _ = extend_to_joint_angles(FR_EXTEND, 'front')
-                hip_angle = base_hip + height_adjustment + roll_adjustment
+                hip_angle = base_hip + height_adjustment + roll_adjustment + current_tilt
             elif 'RL' in joint_name:  # 左后腿
                 base_hip, _ = extend_to_joint_angles(RL_EXTEND, 'rear')
-                hip_angle = base_hip - height_adjustment - roll_adjustment
+                hip_angle = base_hip - height_adjustment - roll_adjustment - current_tilt
             elif 'RR' in joint_name:  # 右后腿
                 base_hip, _ = extend_to_joint_angles(RR_EXTEND, 'rear')
-                hip_angle = base_hip - height_adjustment + roll_adjustment
+                hip_angle = base_hip - height_adjustment + roll_adjustment + current_tilt
             p.setJointMotorControl2(robot, joint_id, p.POSITION_CONTROL, 
                                    targetPosition=hip_angle, force=30)
         elif 'knee' in joint_name:
-            # 膝盖关节角度：使用伸腿值 + 高度调整 + 左右倾斜调整
+            # 膝盖关节角度：使用伸腿值 + 高度调整 + 左右倾斜调整 + 转弯倾斜
             if 'FL' in joint_name:  # 左前腿膝盖
                 _, base_knee = extend_to_joint_angles(FL_EXTEND, 'front')
-                knee_angle = base_knee - height_adjustment + roll_adjustment
+                knee_angle = base_knee - height_adjustment + roll_adjustment + current_tilt
             elif 'FR' in joint_name:  # 右前腿膝盖
                 _, base_knee = extend_to_joint_angles(FR_EXTEND, 'front')
-                knee_angle = base_knee - height_adjustment - roll_adjustment
+                knee_angle = base_knee - height_adjustment - roll_adjustment - current_tilt
             elif 'RL' in joint_name:  # 左后腿膝盖
                 _, base_knee = extend_to_joint_angles(RL_EXTEND, 'rear')
-                knee_angle = base_knee + height_adjustment + roll_adjustment
+                knee_angle = base_knee + height_adjustment + roll_adjustment + current_tilt
             elif 'RR' in joint_name:  # 右后腿膝盖
                 _, base_knee = extend_to_joint_angles(RR_EXTEND, 'rear')
-                knee_angle = base_knee + height_adjustment - roll_adjustment
+                knee_angle = base_knee + height_adjustment - roll_adjustment - current_tilt
             p.setJointMotorControl2(robot, joint_id, p.POSITION_CONTROL, 
                                    targetPosition=knee_angle, force=30)
     
@@ -271,16 +318,16 @@ def step_mode_control(t):
         if 'hip' in joint_name:
             if 'FL' in joint_name:  # 左前腿
                 base_hip, _ = extend_to_joint_angles(fl_extend, 'front')
-                hip_angle = base_hip + height_adjustment - roll_adjustment
+                hip_angle = base_hip + height_adjustment - roll_adjustment - current_tilt
             elif 'FR' in joint_name:  # 右前腿
                 base_hip, _ = extend_to_joint_angles(fr_extend, 'front')
-                hip_angle = base_hip + height_adjustment + roll_adjustment
+                hip_angle = base_hip + height_adjustment + roll_adjustment + current_tilt
             elif 'RL' in joint_name:  # 左后腿
                 base_hip, _ = extend_to_joint_angles(rl_extend, 'rear')
-                hip_angle = base_hip - height_adjustment - roll_adjustment
+                hip_angle = base_hip - height_adjustment - roll_adjustment - current_tilt
             elif 'RR' in joint_name:  # 右后腿
                 base_hip, _ = extend_to_joint_angles(rr_extend, 'rear')
-                hip_angle = base_hip - height_adjustment + roll_adjustment
+                hip_angle = base_hip - height_adjustment + roll_adjustment + current_tilt
             
             p.setJointMotorControl2(robot, joint_id, p.POSITION_CONTROL,
                                    targetPosition=hip_angle, force=30)
@@ -288,16 +335,16 @@ def step_mode_control(t):
         elif 'knee' in joint_name:
             if 'FL' in joint_name:  # 左前腿膝盖
                 _, base_knee = extend_to_joint_angles(fl_extend, 'front')
-                knee_angle = base_knee - height_adjustment + roll_adjustment
+                knee_angle = base_knee - height_adjustment + roll_adjustment + current_tilt
             elif 'FR' in joint_name:  # 右前腿膝盖
                 _, base_knee = extend_to_joint_angles(fr_extend, 'front')
-                knee_angle = base_knee - height_adjustment - roll_adjustment
+                knee_angle = base_knee - height_adjustment - roll_adjustment - current_tilt
             elif 'RL' in joint_name:  # 左后腿膝盖
                 _, base_knee = extend_to_joint_angles(rl_extend, 'rear')
-                knee_angle = base_knee + height_adjustment + roll_adjustment
+                knee_angle = base_knee + height_adjustment + roll_adjustment + current_tilt
             elif 'RR' in joint_name:  # 右后腿膝盖
                 _, base_knee = extend_to_joint_angles(rr_extend, 'rear')
-                knee_angle = base_knee + height_adjustment - roll_adjustment
+                knee_angle = base_knee + height_adjustment - roll_adjustment - current_tilt
             
             p.setJointMotorControl2(robot, joint_id, p.POSITION_CONTROL,
                                    targetPosition=knee_angle, force=30)
@@ -328,11 +375,11 @@ def check_keyboard_input():
         roll_adjustment -= roll_step
         print(f"右倾调整: -{roll_step:.2f}, 当前偏移: {roll_adjustment:.2f}")
     
-    # 左转/右转 - 使用方向键
+    # 左转/右转 - 使用方向键（改进的转向控制）
     if ord('4') in keys:  # 左方向键 - 左转
-        current_turn = turn_speed
+        current_turn = 1.0  # 标准化转向输入 (-1 到 1)
     elif ord('6') in keys:  # 右方向键 - 右转
-        current_turn = -turn_speed
+        current_turn = -1.0  # 标准化转向输入 (-1 到 1)
     
     # 模式切换
     if ord('1') in keys and keys[ord('1')] & p.KEY_WAS_TRIGGERED:  # 1键 - 静止模式
@@ -365,19 +412,16 @@ def wheel_drive_control(t):
     
     # 根据模式执行不同的控制
     if current_mode == 1:
-        # 静止模式：轮子驱动 + 稳定姿态
-        # 计算每个轮子的速度
-        front_left_speed = current_speed + current_turn
-        front_right_speed = current_speed - current_turn
-        rear_left_speed = current_speed + current_turn
-        rear_right_speed = current_speed - current_turn
+        # 静止模式：轮子驱动 + 稳定姿态 + 倾斜转弯
+        # 使用新的倾斜转弯函数计算轮子速度
+        left_speed, right_speed, tilt_angle = apply_tilt_turning(current_turn, current_speed)
         
-        # 应用轮子速度
+        # 应用轮子速度（前后轮使用相同的左右速度）
         wheel_controls = {
-            'FL_wheel_joint': front_left_speed,
-            'FR_wheel_joint': front_right_speed,
-            'RL_wheel_joint': rear_left_speed,
-            'RR_wheel_joint': rear_right_speed
+            'FL_wheel_joint': left_speed,   # 左前轮
+            'FR_wheel_joint': right_speed,  # 右前轮
+            'RL_wheel_joint': left_speed,   # 左后轮
+            'RR_wheel_joint': right_speed   # 右后轮
         }
         
         for wheel_name, wheel_id in wheel_indices.items():
@@ -385,36 +429,36 @@ def wheel_drive_control(t):
                 p.setJointMotorControl2(robot, wheel_id, p.VELOCITY_CONTROL,
                                        targetVelocity=wheel_controls[wheel_name], force=50)
         
-        # 保持四足屈膝稳定姿态
+        # 保持四足屈膝稳定姿态（包含倾斜转弯效果）
         for joint_name, joint_id in joint_indices.items():
             if 'hip' in joint_name:
                 if 'FL' in joint_name:
                     base_hip, _ = extend_to_joint_angles(FL_EXTEND, 'front')
-                    hip_angle = base_hip + height_adjustment - roll_adjustment
+                    hip_angle = base_hip + height_adjustment - roll_adjustment - tilt_angle
                 elif 'FR' in joint_name:
                     base_hip, _ = extend_to_joint_angles(FR_EXTEND, 'front')
-                    hip_angle = base_hip + height_adjustment + roll_adjustment
+                    hip_angle = base_hip + height_adjustment + roll_adjustment + tilt_angle
                 elif 'RL' in joint_name:
                     base_hip, _ = extend_to_joint_angles(RL_EXTEND, 'rear')
-                    hip_angle = base_hip - height_adjustment - roll_adjustment
+                    hip_angle = base_hip - height_adjustment - roll_adjustment - tilt_angle
                 elif 'RR' in joint_name:
                     base_hip, _ = extend_to_joint_angles(RR_EXTEND, 'rear')
-                    hip_angle = base_hip - height_adjustment + roll_adjustment
+                    hip_angle = base_hip - height_adjustment + roll_adjustment + tilt_angle
                 p.setJointMotorControl2(robot, joint_id, p.POSITION_CONTROL,
                                        targetPosition=hip_angle, force=30)
             elif 'knee' in joint_name:
                 if 'FL' in joint_name:
                     _, base_knee = extend_to_joint_angles(FL_EXTEND, 'front')
-                    knee_angle = base_knee - height_adjustment + roll_adjustment
+                    knee_angle = base_knee - height_adjustment + roll_adjustment + tilt_angle
                 elif 'FR' in joint_name:
                     _, base_knee = extend_to_joint_angles(FR_EXTEND, 'front')
-                    knee_angle = base_knee - height_adjustment - roll_adjustment
+                    knee_angle = base_knee - height_adjustment - roll_adjustment - tilt_angle
                 elif 'RL' in joint_name:
                     _, base_knee = extend_to_joint_angles(RL_EXTEND, 'rear')
-                    knee_angle = base_knee + height_adjustment + roll_adjustment
+                    knee_angle = base_knee + height_adjustment + roll_adjustment + tilt_angle
                 elif 'RR' in joint_name:
                     _, base_knee = extend_to_joint_angles(RR_EXTEND, 'rear')
-                    knee_angle = base_knee + height_adjustment - roll_adjustment
+                    knee_angle = base_knee + height_adjustment - roll_adjustment - tilt_angle
                 p.setJointMotorControl2(robot, joint_id, p.POSITION_CONTROL,
                                        targetPosition=knee_angle, force=30)
                                        
@@ -439,19 +483,23 @@ for _ in range(100):
 print("开始遥控汽车模式...")
 print("控制说明:")
 print("=== 模式切换 ===")
-print("1 - 静止模式（轮子驱动）")
+print("1 - 静止模式（轮子驱动 + 倾斜转弯）")
 print("2 - 踏步模式（循环踏步）")
 print("=== 移动控制 ===")
 print("I - 前进")
 print("K - 后退") 
-print("← (左方向键) - 左转")
-print("→ (右方向键) - 右转")
+print("← (左方向键) - 左转（倾斜转弯）")
+print("→ (右方向键) - 右转（倾斜转弯）")
 print("空格键 - 停止")
 print("=== 姿态调整 ===")
 print("U - 升高机器人")
 print("O - 降低机器人")
 print("J - 左倾")
 print("L - 右倾")
+print("=== 倾斜转弯特性 ===")
+print("- 转弯时车身会自动倾斜，像遥控车一样")
+print("- 转弯倾斜角度与转向输入和速度成正比")
+print("- 停止转向时车身会逐渐回到水平状态")
 print("=== 传感器数据 ===")
 print("陀螺仪数据每3秒显示一次，包括:")
 print("- 角速度 (X, Y, Z轴)")
@@ -505,6 +553,7 @@ try:
             # 显示姿态调整状态
             height_status = f"高度偏移: {height_adjustment:.2f}"
             roll_status = f"倾斜偏移: {roll_adjustment:.2f}"
+            tilt_status = f"转弯倾斜: {current_tilt:.2f}"
             
             # 陀螺仪数据
             gyro_ang_vel = gyro_data['angular_velocity']
@@ -534,7 +583,7 @@ try:
                 print(f"线性加速度统计 - Y: 均值={lin_acc_stats['y']['mean']:.3f}, 范围=[{lin_acc_stats['y']['min']:.3f}, {lin_acc_stats['y']['max']:.3f}]")
                 print(f"线性加速度统计 - Z: 均值={lin_acc_stats['z']['mean']:.3f}, 范围=[{lin_acc_stats['z']['min']:.3f}, {lin_acc_stats['z']['max']:.3f}]")
             
-            print(f"{height_status} | {roll_status}")
+            print(f"{height_status} | {roll_status} | {tilt_status}")
             print(f"陀螺仪数据记录: {len(gyro_history['time'])}/{gyro_max_history} 条记录")
             print("-" * 50)
             
