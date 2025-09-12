@@ -40,12 +40,12 @@
     <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="FL_hip_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -97,12 +97,12 @@
     <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="FL_knee_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -139,12 +139,12 @@
       <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/>
     </inertial>
   </link>
-  <!-- 轮子连续关节：只能前后滚动，用于驱动 -->
+  <!-- 轮子连续关节：Z轴滚动，不限角度 -->
   <joint name="FL_wheel_joint" type="continuous">
     <parent link="FL_shank"/>
     <child  link="FL_wheel"/>
-    <origin xyz="0 0 -0.125" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    <axis xyz="0 0 1"/>
     <limit effort="20" velocity="50"/>
   </joint>
 
@@ -160,12 +160,12 @@
     <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="FR_hip_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -217,12 +217,12 @@
     <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="FR_knee_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -256,12 +256,12 @@
     </collision>
     <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
   </link>
-  <!-- 轮子连续关节：只能前后滚动，用于驱动 -->
+  <!-- 轮子连续关节：Z轴滚动，不限角度 -->
   <joint name="FR_wheel_joint" type="continuous">
     <parent link="FR_shank"/>
     <child  link="FR_wheel"/>
-    <origin xyz="0 0 -0.125" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    <axis xyz="0 0 1"/>
     <limit effort="20" velocity="50"/>
   </joint>
 
@@ -277,12 +277,12 @@
     <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="RL_hip_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -334,12 +334,12 @@
     <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="RL_knee_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -373,12 +373,12 @@
     </collision>
     <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
   </link>
-  <!-- 轮子连续关节：只能前后滚动，用于驱动 -->
+  <!-- 轮子连续关节：Z轴滚动，不限角度 -->
   <joint name="RL_wheel_joint" type="continuous">
     <parent link="RL_shank"/>
     <child  link="RL_wheel"/>
-    <origin xyz="0 0 -0.125" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    <axis xyz="0 0 1"/>
     <limit effort="20" velocity="50"/>
   </joint>
 
@@ -394,12 +394,12 @@
     <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 髋关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="RR_hip_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -451,12 +451,12 @@
     <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   
-  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <!-- 膝盖关节标记：灰色圆柱体，前后竖立，3cm长，1.5cm半径 -->
   <link name="RR_knee_marker">
     <visual>
       <geometry><cylinder length="0.05" radius="0.03"/></geometry>
-      <material name="black">
-        <color rgba="0 0 0 1.0"/>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1.0"/>
       </material>
       <origin xyz="0 0 0" rpy="1.57 0 0"/>
     </visual>
@@ -490,12 +490,12 @@
     </collision>
     <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
   </link>
-  <!-- 轮子连续关节：只能前后滚动，用于驱动 -->
+  <!-- 轮子连续关节：Z轴滚动，不限角度 -->
   <joint name="RR_wheel_joint" type="continuous">
     <parent link="RR_shank"/>
     <child  link="RR_wheel"/>
-    <origin xyz="0 0 -0.125" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    <axis xyz="0 0 1"/>
     <limit effort="20" velocity="50"/>
   </joint>
 
