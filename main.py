@@ -44,6 +44,26 @@ for j in range(p.getNumJoints(robot)):
 print("找到的关节:", joint_indices)
 print("找到的轮子:", wheel_indices)
 
+# 陀螺仪数据存储
+gyro_data = {
+    'angular_velocity': [0.0, 0.0, 0.0],  # 角速度 (rad/s)
+    'linear_acceleration': [0.0, 0.0, 0.0],  # 线性加速度 (m/s²)
+    'orientation': [0.0, 0.0, 0.0],  # 姿态角 (roll, pitch, yaw)
+    'orientation_quat': [0.0, 0.0, 0.0, 1.0]  # 四元数姿态
+}
+
+# 陀螺仪数据历史记录（用于分析）
+gyro_history = {
+    'time': [],
+    'angular_velocity': [],
+    'linear_acceleration': [],
+    'orientation': []
+}
+
+# 陀螺仪数据记录参数
+gyro_record_enabled = True  # 是否记录数据
+gyro_max_history = 1000     # 最大历史记录数量
+
 # 控制参数
 wheel_speed = 6.0  # 轮子速度
 time_step = 0.01    # 时间步长
@@ -90,6 +110,84 @@ step_phase_offset = 0.5    # 腿之间的相位差 (0.5 = 180度)
 step_cycle_1 = [0.1, 0.5, 0.5, 0.1]  # 第一组：FL, FR, RL, RR
 step_cycle_2 = [0.5, 0.1, 0.1, 0.5]  # 第二组：FL, FR, RL, RR
 current_step_cycle = step_cycle_1     # 当前使用的循环
+
+# 陀螺仪数据获取函数
+def get_gyroscope_data(t=0.0):
+    """
+    获取机器人的陀螺仪数据（角速度、加速度、姿态）
+    返回更新后的陀螺仪数据字典
+    """
+    global gyro_data, gyro_history, gyro_record_enabled
+    
+    # 获取机器人基座的位置和姿态
+    pos, orn = p.getBasePositionAndOrientation(robot)
+    
+    # 获取机器人基座的速度和角速度
+    vel, ang_vel = p.getBaseVelocity(robot)
+    
+    # 获取线性加速度（通过速度变化计算）
+    # 注意：PyBullet不直接提供加速度，这里使用速度作为近似
+    linear_vel = vel
+    
+    # 将四元数转换为欧拉角
+    euler = p.getEulerFromQuaternion(orn)
+    
+    # 更新陀螺仪数据
+    gyro_data['angular_velocity'] = list(ang_vel)  # 角速度 (rad/s)
+    gyro_data['linear_acceleration'] = list(linear_vel)  # 线性速度作为加速度近似
+    gyro_data['orientation'] = list(euler)  # 姿态角 (roll, pitch, yaw)
+    gyro_data['orientation_quat'] = list(orn)  # 四元数姿态
+    
+    # 记录历史数据（如果启用）
+    if gyro_record_enabled:
+        gyro_history['time'].append(t)
+        gyro_history['angular_velocity'].append(list(ang_vel))
+        gyro_history['linear_acceleration'].append(list(linear_vel))
+        gyro_history['orientation'].append(list(euler))
+        
+        # 限制历史记录数量
+        if len(gyro_history['time']) > gyro_max_history:
+            gyro_history['time'].pop(0)
+            gyro_history['angular_velocity'].pop(0)
+            gyro_history['linear_acceleration'].pop(0)
+            gyro_history['orientation'].pop(0)
+    
+    return gyro_data
+
+# 陀螺仪数据分析函数
+def analyze_gyro_data():
+    """
+    分析陀螺仪数据，计算统计信息
+    """
+    if not gyro_history['time']:
+        return None
+    
+    # 计算角速度统计
+    ang_vel_data = gyro_history['angular_velocity']
+    ang_vel_x = [data[0] for data in ang_vel_data]
+    ang_vel_y = [data[1] for data in ang_vel_data]
+    ang_vel_z = [data[2] for data in ang_vel_data]
+    
+    # 计算线性加速度统计
+    lin_acc_data = gyro_history['linear_acceleration']
+    lin_acc_x = [data[0] for data in lin_acc_data]
+    lin_acc_y = [data[1] for data in lin_acc_data]
+    lin_acc_z = [data[2] for data in lin_acc_data]
+    
+    analysis = {
+        'angular_velocity': {
+            'x': {'mean': sum(ang_vel_x)/len(ang_vel_x), 'max': max(ang_vel_x), 'min': min(ang_vel_x)},
+            'y': {'mean': sum(ang_vel_y)/len(ang_vel_y), 'max': max(ang_vel_y), 'min': min(ang_vel_y)},
+            'z': {'mean': sum(ang_vel_z)/len(ang_vel_z), 'max': max(ang_vel_z), 'min': min(ang_vel_z)}
+        },
+        'linear_acceleration': {
+            'x': {'mean': sum(lin_acc_x)/len(lin_acc_x), 'max': max(lin_acc_x), 'min': min(lin_acc_x)},
+            'y': {'mean': sum(lin_acc_y)/len(lin_acc_y), 'max': max(lin_acc_y), 'min': min(lin_acc_y)},
+            'z': {'mean': sum(lin_acc_z)/len(lin_acc_z), 'max': max(lin_acc_z), 'min': min(lin_acc_z)}
+        }
+    }
+    
+    return analysis
 
 # 伸腿值转换为关节角度的函数
 def extend_to_joint_angles(extend_value, leg_type):
@@ -354,6 +452,11 @@ print("U - 升高机器人")
 print("O - 降低机器人")
 print("J - 左倾")
 print("L - 右倾")
+print("=== 传感器数据 ===")
+print("陀螺仪数据每3秒显示一次，包括:")
+print("- 角速度 (X, Y, Z轴)")
+print("- 线性加速度 (X, Y, Z轴)")
+print("- 姿态角 (滚转, 俯仰, 偏航)")
 print("=== 其他 ===")
 print("按 Ctrl+C 退出")
 
@@ -365,6 +468,9 @@ try:
     while True:
         # 执行轮子驱动控制
         wheel_drive_control(t)
+        
+        # 获取陀螺仪数据
+        gyro_data = get_gyroscope_data(t)
         
         # 推进仿真
         p.stepSimulation()
@@ -400,11 +506,36 @@ try:
             height_status = f"高度偏移: {height_adjustment:.2f}"
             roll_status = f"倾斜偏移: {roll_adjustment:.2f}"
             
+            # 陀螺仪数据
+            gyro_ang_vel = gyro_data['angular_velocity']
+            gyro_lin_acc = gyro_data['linear_acceleration']
+            gyro_orient = gyro_data['orientation']
+            
+            # 分析陀螺仪数据
+            gyro_analysis = analyze_gyro_data()
+            
             print(f"时间: {t:.1f}s | 模式: {mode_name} | 状态: {status}")
             print(f"位置: ({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f})")
             print(f"速度: ({vel[0]:.2f}, {vel[1]:.2f}, {vel[2]:.2f})")
             print(f"姿态: 滚转={euler[0]:.2f}, 俯仰={euler[1]:.2f}, 偏航={euler[2]:.2f}")
+            print(f"陀螺仪角速度: X={gyro_ang_vel[0]:.3f}, Y={gyro_ang_vel[1]:.3f}, Z={gyro_ang_vel[2]:.3f} rad/s")
+            print(f"陀螺仪线性加速度: X={gyro_lin_acc[0]:.3f}, Y={gyro_lin_acc[1]:.3f}, Z={gyro_lin_acc[2]:.3f} m/s²")
+            print(f"陀螺仪姿态: 滚转={gyro_orient[0]:.3f}, 俯仰={gyro_orient[1]:.3f}, 偏航={gyro_orient[2]:.3f} rad")
+            
+            # 显示陀螺仪数据分析（如果有足够数据）
+            if gyro_analysis and len(gyro_history['time']) > 10:
+                print("=== 陀螺仪数据分析 ===")
+                ang_vel_stats = gyro_analysis['angular_velocity']
+                lin_acc_stats = gyro_analysis['linear_acceleration']
+                print(f"角速度统计 - X: 均值={ang_vel_stats['x']['mean']:.3f}, 范围=[{ang_vel_stats['x']['min']:.3f}, {ang_vel_stats['x']['max']:.3f}]")
+                print(f"角速度统计 - Y: 均值={ang_vel_stats['y']['mean']:.3f}, 范围=[{ang_vel_stats['y']['min']:.3f}, {ang_vel_stats['y']['max']:.3f}]")
+                print(f"角速度统计 - Z: 均值={ang_vel_stats['z']['mean']:.3f}, 范围=[{ang_vel_stats['z']['min']:.3f}, {ang_vel_stats['z']['max']:.3f}]")
+                print(f"线性加速度统计 - X: 均值={lin_acc_stats['x']['mean']:.3f}, 范围=[{lin_acc_stats['x']['min']:.3f}, {lin_acc_stats['x']['max']:.3f}]")
+                print(f"线性加速度统计 - Y: 均值={lin_acc_stats['y']['mean']:.3f}, 范围=[{lin_acc_stats['y']['min']:.3f}, {lin_acc_stats['y']['max']:.3f}]")
+                print(f"线性加速度统计 - Z: 均值={lin_acc_stats['z']['mean']:.3f}, 范围=[{lin_acc_stats['z']['min']:.3f}, {lin_acc_stats['z']['max']:.3f}]")
+            
             print(f"{height_status} | {roll_status}")
+            print(f"陀螺仪数据记录: {len(gyro_history['time'])}/{gyro_max_history} 条记录")
             print("-" * 50)
             
             last_status_time = t
