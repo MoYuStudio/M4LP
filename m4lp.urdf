@@ -1,0 +1,491 @@
+<?xml version="1.0" ?>
+<robot name="M4LP">
+  <!-- 
+    M4LP 四足机器人 URDF 文件
+    机器人规格：
+    - 车身：60cm x 25cm x 15cm，薄荷绿色
+    - 大腿：18cm 长，浅灰色
+    - 小腿：18cm 长，浅灰色  
+    - 轮子：直径10cm，厚度4cm，黑色
+    - 关节：270度旋转范围，前后方向运动
+    - 关节标记：黑色圆柱体，前后竖立
+  -->
+
+  <!-- 车身：60cm x 25cm x 15cm，薄荷绿色 -->
+  <link name="base">
+    <visual>
+      <geometry><box size="0.60 0.25 0.15"/></geometry>
+      <material name="mint_green">
+        <color rgba="0.6 1.0 0.8 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry><box size="0.60 0.25 0.15"/></geometry>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.01" iyy="0.01" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <!-- 
+    FL 腿（前左腿）结构：
+    - FL_hip: 髋关节连接点，无视觉几何体
+    - FL_thigh: 大腿，18cm长，浅灰色
+    - FL_shank: 小腿，18cm长，浅灰色
+    - FL_wheel: 轮子，直径10cm，黑色
+    - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
+  -->
+  <link name="FL_hip">
+    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="FL_hip_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="FL_hip_marker_joint" type="fixed">
+    <parent link="FL_hip"/>
+    <child link="FL_hip_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 髋关节：位置(22.5, 12.5, 0)cm，前后方向旋转，270度范围 -->
+  <joint name="FL_hip_joint" type="revolute">
+    <parent link="base"/>
+    <child  link="FL_hip"/>
+    <origin xyz="0.225 0.15 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 大腿：19cm长，6cm x 4cm截面，浅柠檬黄 -->
+  <link name="FL_thigh">
+    <visual>
+        <geometry><box size="0.06 0.04 0.19"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
+    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  <!-- 大腿固定关节：从髋关节向下12.5cm -->
+  <joint name="FL_thigh_joint" type="fixed">
+    <parent link="FL_hip"/>
+    <child  link="FL_thigh"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 小腿：25cm长，4cm x 2cm截面，浅柠檬黄，视觉向下偏移12.5cm -->
+  <link name="FL_shank">
+    <visual>
+        <geometry><box size="0.04 0.02 0.25"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+        <origin xyz="0 0 -0.125" rpy="0 0 0"/>
+    </visual>
+    <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
+    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="FL_knee_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="FL_knee_marker_joint" type="fixed">
+    <parent link="FL_shank"/>
+    <child link="FL_knee_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 膝盖关节：从大腿末端向下12.5cm，前后方向旋转，270度范围 -->
+  <joint name="FL_knee_joint" type="revolute">
+    <parent link="FL_thigh"/>
+    <child  link="FL_shank"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 轮子：直径10cm，厚度4cm，黑色，水平放置，向下偏移25cm -->
+  <link name="FL_wheel">
+    <visual>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </collision>
+    <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <!-- 轮子固定关节：固定在小腿末端 -->
+  <joint name="FL_wheel_joint" type="fixed">
+    <parent link="FL_shank"/>
+    <child  link="FL_wheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 
+    FR 腿（前右腿）结构：
+    - FR_hip: 髋关节连接点，无视觉几何体
+    - FR_thigh: 大腿，18cm长，浅灰色
+    - FR_shank: 小腿，18cm长，浅灰色
+    - FR_wheel: 轮子，直径10cm，黑色
+    - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
+  -->
+  <link name="FR_hip">
+    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="FR_hip_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="FR_hip_marker_joint" type="fixed">
+    <parent link="FR_hip"/>
+    <child link="FR_hip_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 髋关节：位置(22.5, -12.5, 0)cm，前后方向旋转，270度范围 -->
+  <joint name="FR_hip_joint" type="revolute">
+    <parent link="base"/>
+    <child  link="FR_hip"/>
+    <origin xyz="0.225 -0.15 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 大腿：19cm长，6cm x 4cm截面，浅柠檬黄 -->
+  <link name="FR_thigh">
+    <visual>
+        <geometry><box size="0.06 0.04 0.19"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
+    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  <!-- 大腿固定关节：从髋关节向下12.5cm -->
+  <joint name="FR_thigh_joint" type="fixed">
+    <parent link="FR_hip"/>
+    <child  link="FR_thigh"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 小腿：25cm长，4cm x 2cm截面，浅柠檬黄，视觉向下偏移12.5cm -->
+  <link name="FR_shank">
+    <visual>
+        <geometry><box size="0.04 0.02 0.25"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+        <origin xyz="0 0 -0.125" rpy="0 0 0"/>
+    </visual>
+    <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
+    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="FR_knee_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="FR_knee_marker_joint" type="fixed">
+    <parent link="FR_shank"/>
+    <child link="FR_knee_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 膝盖关节：从大腿末端向下12.5cm，前后方向旋转，270度范围 -->
+  <joint name="FR_knee_joint" type="revolute">
+    <parent link="FR_thigh"/>
+    <child  link="FR_shank"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 轮子：直径10cm，厚度4cm，黑色，水平放置，向下偏移25cm -->
+  <link name="FR_wheel">
+    <visual>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </collision>
+    <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <!-- 轮子固定关节：固定在小腿末端 -->
+  <joint name="FR_wheel_joint" type="fixed">
+    <parent link="FR_shank"/>
+    <child  link="FR_wheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 
+    RL 腿（后左腿）结构：
+    - RL_hip: 髋关节连接点，无视觉几何体
+    - RL_thigh: 大腿，18cm长，浅灰色
+    - RL_shank: 小腿，18cm长，浅灰色
+    - RL_wheel: 轮子，直径10cm，黑色
+    - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
+  -->
+  <link name="RL_hip">
+    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="RL_hip_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="RL_hip_marker_joint" type="fixed">
+    <parent link="RL_hip"/>
+    <child link="RL_hip_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 髋关节：位置(-22.5, 12.5, 0)cm，前后方向旋转，270度范围 -->
+  <joint name="RL_hip_joint" type="revolute">
+    <parent link="base"/>
+    <child  link="RL_hip"/>
+    <origin xyz="-0.225 0.15 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 大腿：19cm长，6cm x 4cm截面，浅柠檬黄 -->
+  <link name="RL_thigh">
+    <visual>
+        <geometry><box size="0.06 0.04 0.19"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
+    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  <!-- 大腿固定关节：从髋关节向下12.5cm -->
+  <joint name="RL_thigh_joint" type="fixed">
+    <parent link="RL_hip"/>
+    <child  link="RL_thigh"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 小腿：25cm长，4cm x 2cm截面，浅柠檬黄，视觉向下偏移12.5cm -->
+  <link name="RL_shank">
+    <visual>
+        <geometry><box size="0.04 0.02 0.25"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+        <origin xyz="0 0 -0.125" rpy="0 0 0"/>
+    </visual>
+    <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
+    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="RL_knee_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="RL_knee_marker_joint" type="fixed">
+    <parent link="RL_shank"/>
+    <child link="RL_knee_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 膝盖关节：从大腿末端向下12.5cm，前后方向旋转，270度范围 -->
+  <joint name="RL_knee_joint" type="revolute">
+    <parent link="RL_thigh"/>
+    <child  link="RL_shank"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 轮子：直径10cm，厚度4cm，黑色，水平放置，向下偏移25cm -->
+  <link name="RL_wheel">
+    <visual>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </collision>
+    <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <!-- 轮子固定关节：固定在小腿末端 -->
+  <joint name="RL_wheel_joint" type="fixed">
+    <parent link="RL_shank"/>
+    <child  link="RL_wheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 
+    RR 腿（后右腿）结构：
+    - RR_hip: 髋关节连接点，无视觉几何体
+    - RR_thigh: 大腿，18cm长，浅灰色
+    - RR_shank: 小腿，18cm长，浅灰色
+    - RR_wheel: 轮子，直径10cm，黑色
+    - 关节位置：大腿从髋关节向下12.5cm，小腿从大腿末端向下12.5cm
+  -->
+  <link name="RR_hip">
+    <inertial><mass value="0.1"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 髋关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="RR_hip_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="RR_hip_marker_joint" type="fixed">
+    <parent link="RR_hip"/>
+    <child link="RR_hip_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 髋关节：位置(-22.5, -12.5, 0)cm，前后方向旋转，270度范围 -->
+  <joint name="RR_hip_joint" type="revolute">
+    <parent link="base"/>
+    <child  link="RR_hip"/>
+    <origin xyz="-0.225 -0.15 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 大腿：19cm长，6cm x 4cm截面，浅柠檬黄 -->
+  <link name="RR_thigh">
+    <visual>
+        <geometry><box size="0.06 0.04 0.19"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision><geometry><box size="0.06 0.04 0.19"/></geometry></collision>
+    <inertial><mass value="0.15"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  <!-- 大腿固定关节：从髋关节向下12.5cm -->
+  <joint name="RR_thigh_joint" type="fixed">
+    <parent link="RR_hip"/>
+    <child  link="RR_thigh"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+  </joint>
+
+  <!-- 小腿：25cm长，4cm x 2cm截面，浅柠檬黄，视觉向下偏移12.5cm -->
+  <link name="RR_shank">
+    <visual>
+        <geometry><box size="0.04 0.02 0.25"/></geometry>
+      <material name="lemon_yellow">
+        <color rgba="1.0 1.0 0.3 1.0"/>
+      </material>
+        <origin xyz="0 0 -0.125" rpy="0 0 0"/>
+    </visual>
+    <collision><geometry><box size="0.04 0.02 0.25"/></geometry></collision>
+    <inertial><mass value="0.12"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
+  </link>
+  
+  <!-- 膝盖关节标记：黑色圆柱体，前后竖立，3cm长，1.5cm半径 -->
+  <link name="RR_knee_marker">
+    <visual>
+      <geometry><cylinder length="0.05" radius="0.03"/></geometry>
+      <material name="black">
+        <color rgba="0 0 0 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="1.57 0 0"/>
+    </visual>
+    <collision><geometry><cylinder length="0.03" radius="0.03"/></geometry></collision>
+    <inertial><mass value="0.01"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <joint name="RR_knee_marker_joint" type="fixed">
+    <parent link="RR_shank"/>
+    <child link="RR_knee_marker"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <!-- 膝盖关节：从大腿末端向下12.5cm，前后方向旋转，270度范围 -->
+  <joint name="RR_knee_joint" type="revolute">
+    <parent link="RR_thigh"/>
+    <child  link="RR_shank"/>
+        <origin xyz="0 0 -0.09" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="10" velocity="10" lower="-2.356" upper="2.356"/>
+  </joint>
+
+  <!-- 轮子：直径10cm，厚度4cm，黑色，水平放置，向下偏移25cm -->
+  <link name="RR_wheel">
+    <visual>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </visual>
+    <collision>
+      <geometry><cylinder length="0.04" radius="0.05"/></geometry>
+      <origin xyz="0 0 -0.25" rpy="1.57 0 0"/>
+    </collision>
+    <inertial><mass value="0.08"/><inertia ixx="0.0001" iyy="0.0001" izz="0.0001"/></inertial>
+  </link>
+  <!-- 轮子固定关节：固定在小腿末端 -->
+  <joint name="RR_wheel_joint" type="fixed">
+    <parent link="RR_shank"/>
+    <child  link="RR_wheel"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+</robot>
